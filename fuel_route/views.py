@@ -18,31 +18,24 @@ class FuelRouteView(APIView):
             return Response({"error": "Start and end locations are required"}, status=status.HTTP_400_BAD_REQUEST)
         
         try:
-            # Geocode
             geocoder = Nominatim(user_agent="fuel_route_planner")
             start_geo = geocoder.geocode(start_loc, timeout=10)
             end_geo = geocoder.geocode(end_loc, timeout=10)
             
             if not start_geo or not end_geo:
-                return Response({
-                    "error": f"Could not geocode locations. Start: {start_geo}, End: {end_geo}",
-                    "start_query": start_loc,
-                    "end_query": end_loc
-                }, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"error": "Could not geocode locations"}, status=status.HTTP_400_BAD_REQUEST)
             
             start_coords = [start_geo.longitude, start_geo.latitude]
             end_coords = [end_geo.longitude, end_geo.latitude]
             
-            # Get Route
+            # Get Route (now using OSRM)
             route = RoutingService.get_route(start_coords, end_coords)
-            
-            # Find Stops
             stops = RoutingService.find_optimal_stops(route)
             serializer = FuelStationSerializer(stops, many=True)
             
-            # Calculations
-            summary_data = route['routes'][0]['summary']
-            total_dist_miles = summary_data['distance'] * 0.000621371
+            # OSRM puts distance directly in the route object
+            total_dist_meters = route['routes'][0].get('distance', 0)
+            total_dist_miles = total_dist_meters * 0.000621371
             total_fuel_needed = total_dist_miles / 10.0
             avg_price = sum([float(s.retail_price) for s in stops]) / len(stops) if stops else 0
             total_cost = float(total_fuel_needed) * float(avg_price)
@@ -69,8 +62,4 @@ class FuelRouteView(APIView):
             return Response(data)
             
         except Exception as e:
-            # Catch all errors and return them as JSON for easier debugging
-            return Response({
-                "error": str(e),
-                "details": "Check your ORS_API_KEY and Ensure geocoding is working."
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

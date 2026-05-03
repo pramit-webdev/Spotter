@@ -9,36 +9,23 @@ class RoutingService:
     @staticmethod
     def get_route(start_coords, end_coords):
         """
-        Get route from OpenRouteService. coords are [lon, lat]
+        Get route from OSRM (Open Source Routing Machine)
+        Public demo server - No API key needed!
+        coords are [lon, lat]
         """
-        api_key = os.getenv('ORS_API_KEY')
-        url = "https://api.openrouteservice.org/v2/directions/driving-car"
+        # OSRM format: lon,lat;lon,lat
+        url = f"http://router.project-osrm.org/route/v1/driving/{start_coords[0]},{start_coords[1]};{end_coords[0]},{end_coords[1]}?overview=full&geometries=geojson"
         
-        headers = {
-            'Accept': 'application/json, application/geo+json',
-            'Authorization': api_key,
-            'Content-Type': 'application/json; charset=utf-8'
-        }
-        
-        body = {"coordinates": [start_coords, end_coords]}
-        
-        response = requests.post(url, json=body, headers=headers)
+        response = requests.get(url)
         
         if response.status_code != 200:
-            error_data = response.json() if response.headers.get('Content-Type') == 'application/json' else response.text
-            raise Exception(f"ORS API Error ({response.status_code}): {error_data}")
+            raise Exception(f"OSRM API Error ({response.status_code}): {response.text}")
             
-        return response.json()
-
-    @staticmethod
-    def haversine(lat1, lon1, lat2, lon2):
-        """Calculate distance between two points in miles"""
-        R = 3958.8  # Earth radius in miles
-        phi1, phi2 = math.radians(lat1), math.radians(lat2)
-        dphi = math.radians(lat2 - lat1)
-        dlambda = math.radians(lon2 - lon1)
-        a = math.sin(dphi/2)**2 + math.cos(phi1)*math.cos(phi2)*math.sin(dlambda/2)**2
-        return 2 * R * math.atan2(math.sqrt(a), math.sqrt(1-a))
+        data = response.json()
+        
+        # Format OSRM response to match our expected structure
+        # OSRM returns 'routes', we just need to make sure indexing works
+        return data
 
     @staticmethod
     def find_optimal_stops(route_geojson):
@@ -50,10 +37,12 @@ class RoutingService:
                 return []
                 
             line_points = route_geojson['routes'][0]['geometry']['coordinates']
-            summary = route_geojson['routes'][0]['summary']
-            total_dist_miles = summary['distance'] * 0.000621371
+            # OSRM summary uses 'distance' in meters, same as ORS
+            summary = route_geojson['routes'][0]
+            total_dist_meters = summary.get('distance', 0)
+            total_dist_miles = total_dist_meters * 0.000621371
             
-            # 1. Get candidate stations within a bounding box of the route
+            # 1. Get candidate stations near the route
             lats = [p[1] for p in line_points]
             lons = [p[0] for p in line_points]
             stations = FuelStation.objects.filter(
@@ -64,7 +53,6 @@ class RoutingService:
             selected_stops = []
             miles_traveled = 0
             
-            # Greedy logic
             while miles_traveled < (total_dist_miles - 100):
                 candidates = [s for s in stations if s not in selected_stops]
                 if not candidates:
