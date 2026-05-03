@@ -8,6 +8,10 @@ from .services import RoutingService
 from geopy.geocoders import ArcGIS
 import json
 
+class HomeView(APIView):
+    def get(self, request):
+        return render(request, 'fuel_route/index.html')
+
 class FuelRouteView(APIView):
     def get(self, request):
         start_loc = request.query_params.get('start')
