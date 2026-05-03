@@ -20,8 +20,8 @@ class FuelRouteView(APIView):
         try:
             # Geocode
             geocoder = Nominatim(user_agent="fuel_route_planner")
-            start_geo = geocoder.geocode(start_loc)
-            end_geo = geocoder.geocode(end_loc)
+            start_geo = geocoder.geocode(start_loc, timeout=10)
+            end_geo = geocoder.geocode(end_loc, timeout=10)
             
             if not start_geo or not end_geo:
                 return Response({
