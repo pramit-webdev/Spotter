@@ -5,7 +5,7 @@ from rest_framework import status
 from .models import FuelStation
 from .serializers import FuelStationSerializer
 from .services import RoutingService
-from geopy.geocoders import Nominatim
+from geopy.geocoders import ArcGIS
 import json
 
 class FuelRouteView(APIView):
@@ -18,22 +18,24 @@ class FuelRouteView(APIView):
             return Response({"error": "Start and end locations are required"}, status=status.HTTP_400_BAD_REQUEST)
         
         try:
-            geocoder = Nominatim(user_agent="fuel_route_planner")
+            # ArcGIS Geocoder is much more stable on shared hosting like Render
+            geocoder = ArcGIS(user_agent="fuel_route_planner_v2")
+            
             start_geo = geocoder.geocode(start_loc, timeout=10)
             end_geo = geocoder.geocode(end_loc, timeout=10)
             
             if not start_geo or not end_geo:
-                return Response({"error": "Could not geocode locations"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"error": f"Could not geocode locations. Start: {start_geo}, End: {end_geo}"}, status=status.HTTP_400_BAD_REQUEST)
             
             start_coords = [start_geo.longitude, start_geo.latitude]
             end_coords = [end_geo.longitude, end_geo.latitude]
             
-            # Get Route (now using OSRM)
+            # Get Route from OSRM
             route = RoutingService.get_route(start_coords, end_coords)
             stops = RoutingService.find_optimal_stops(route)
             serializer = FuelStationSerializer(stops, many=True)
             
-            # OSRM puts distance directly in the route object
+            # Calculations
             total_dist_meters = route['routes'][0].get('distance', 0)
             total_dist_miles = total_dist_meters * 0.000621371
             total_fuel_needed = total_dist_miles / 10.0

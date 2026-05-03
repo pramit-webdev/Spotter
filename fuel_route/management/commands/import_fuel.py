@@ -2,7 +2,7 @@ import csv
 import time
 from django.core.management.base import BaseCommand
 from fuel_route.models import FuelStation
-from geopy.geocoders import Nominatim
+from geopy.geocoders import ArcGIS
 from geopy.exc import GeocoderTimedOut
 
 class Command(BaseCommand):
@@ -15,7 +15,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         file_path = options['file']
         limit = options['limit']
-        geocoder = Nominatim(user_agent="fuel_route_planner")
+        geocoder = ArcGIS(user_agent="fuel_route_planner_import")
         
         count = 0
         geocoded_count = 0
