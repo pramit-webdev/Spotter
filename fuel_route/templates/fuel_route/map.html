@@ -133,14 +133,14 @@
             <h1>Optimized Route</h1>
             <div class="route-sub">
                 <span>{{ start }}</span>
-                <svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\"><path d=\"M5 12h14M12 5l7 7-7 7\"/></svg>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                 <span>{{ end }}</span>
             </div>
             
             <div class="stat-grid">
                 <div class="stat-item">
                     <div class="stat-label">Total Distance</div>
-                    <div class="stat-value">{{ summary.total_distance_miles|floatformat:1 }} <span style=\"font-size: 0.8rem; font-weight: 400; opacity: 0.5;\">mi</span></div>
+                    <div class="stat-value">{{ summary.total_distance_miles|floatformat:1 }} <span style="font-size: 0.8rem; font-weight: 400; opacity: 0.5;">mi</span></div>
                 </div>
                 <div class="stat-item">
                     <div class="stat-label">Estimated Cost</div>
@@ -148,7 +148,7 @@
                 </div>
                 <div class="stat-item">
                     <div class="stat-label">Fuel Volume</div>
-                    <div class="stat-value">{{ summary.total_fuel_gallons|floatformat:1 }} <span style=\"font-size: 0.8rem; font-weight: 400; opacity: 0.5;\">gal</span></div>
+                    <div class="stat-value">{{ summary.total_fuel_gallons|floatformat:1 }} <span style="font-size: 0.8rem; font-weight: 400; opacity: 0.5;">gal</span></div>
                 </div>
                 <div class="stat-item">
                     <div class="stat-label">Fuel Stops</div>
@@ -160,24 +160,24 @@
                 <div class="section-title">Recommended Refuel Points</div>
                 {% for stop in fuel_stops %}
                 <div class="fuel-item">
-                    <div style=\"flex: 1;\">
-                        <div style=\"font-weight: 600; font-size: 1rem;\">{{ stop.name }}</div>
-                        <div style=\"font-size: 0.8rem; color: rgba(255,255,255,0.4); margin-top: 2px;\">{{ stop.city }}, {{ stop.state }}</div>
+                    <div style="flex: 1;">
+                        <div style="font-weight: 600; font-size: 1rem;">{{ stop.name }}</div>
+                        <div style="font-size: 0.8rem; color: rgba(255,255,255,0.4); margin-top: 2px;">{{ stop.city }}, {{ stop.state }}</div>
                     </div>
-                    <div style=\"text-align: right;\">
-                        <div style=\"font-weight: 700; color: var(--accent); font-size: 1.1rem;\">${{ stop.retail_price }}</div>
-                        <div style=\"font-size: 0.6rem; text-transform: uppercase; color: rgba(255,255,255,0.3);\">Per Gallon</div>
+                    <div style="text-align: right;">
+                        <div style="font-weight: 700; color: var(--accent); font-size: 1.1rem;">${{ stop.retail_price }}</div>
+                        <div style="font-size: 0.6rem; text-transform: uppercase; color: rgba(255,255,255,0.3);">Per Gallon</div>
                     </div>
                 </div>
                 {% empty %}
-                <div style=\"color: rgba(255,255,255,0.3); font-size: 0.85rem; padding: 20px; text-align: center; border: 1px dashed rgba(255,255,255,0.1); border-radius: 12px;\">No stops required for this trip.</div>
+                <div style="color: rgba(255,255,255,0.3); font-size: 0.85rem; padding: 20px; text-align: center; border: 1px dashed rgba(255,255,255,0.1); border-radius: 12px;">No stops required for this trip.</div>
                 {% endfor %}
             </div>
         </div>
     </div>
 
-    <a href=\"/\" class=\"new-search-btn\">
-        <svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\"><path d=\"M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z\"/></svg>
+    <a href="/" class="new-search-btn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
         New Search
     </a>
 
@@ -204,7 +204,6 @@
                 lineJoin: 'round'
             }).addTo(map);
             
-            // Add a subtle glow to the route line
             var glow = L.polyline(coords, {
                 color: '#3b82f6',
                 weight: 12,
@@ -216,7 +215,6 @@
         }
 
         stops.forEach(function(stop) {
-            // High-end custom marker
             var marker = L.circleMarker([stop.latitude, stop.longitude], {
                 radius: 10,
                 fillColor: '#10b981',
@@ -227,10 +225,10 @@
             }).addTo(map);
 
             marker.bindPopup(`
-                <div style=\"color: #fff; min-width: 200px;\">
-                    <div style=\"font-weight: 700; font-size: 1.1rem; margin-bottom: 5px;\">${stop.name}</div>
-                    <div style=\"color: #10b981; font-weight: 800; font-size: 1.4rem;\">$${stop.retail_price}</div>
-                    <div style=\"color: rgba(255,255,255,0.6); font-size: 0.85rem; margin-top: 5px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 5px;\">${stop.address}<br>${stop.city}, ${stop.state}</div>
+                <div style="color: #fff; min-width: 200px;">
+                    <div style="font-weight: 700; font-size: 1.1rem; margin-bottom: 5px;">${stop.name}</div>
+                    <div style="color: #10b981; font-weight: 800; font-size: 1.4rem;">$${stop.retail_price}</div>
+                    <div style="color: rgba(255,255,255,0.6); font-size: 0.85rem; margin-top: 5px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 5px;">${stop.address}<br>${stop.city}, ${stop.state}</div>
                 </div>
             `);
         });
