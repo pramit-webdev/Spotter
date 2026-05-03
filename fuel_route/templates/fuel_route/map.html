@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Fuel Route Planner</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        #map { height: 600px; width: 100%; border-radius: 12px; }
+        body { font-family: 'Inter', sans-serif; padding: 20px; background: #f4f7f6; }
+        .stats { background: white; padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+    </style>
+</head>
+<body>
+    <div class="stats">
+        <h1>Fuel Route: {{ start }} to {{ end }}</h1>
+        <p><b>Total Distance:</b> {{ summary.total_distance_miles }} miles</p>
+        <p><b>Total Cost:</b> ${{ summary.estimated_total_cost }}</p>
+        <p><b>Fuel Stops:</b> {{ fuel_stops|length }}</p>
+    </div>
+    <div id="map"></div>
+
+    <script>
+        var map = L.map('map');
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+        var routeData = {{ route_json|safe }};
+        var coords = routeData.routes[0].geometry.coordinates.map(p => [p[1], p[0]]);
+        
+        var polyline = L.polyline(coords, {color: 'blue'}).addTo(map);
+        map.fitBounds(polyline.getBounds());
+
+        var stops = {{ stops_json|safe }};
+        stops.forEach(function(stop) {
+            L.marker([stop.latitude, stop.longitude])
+                .addTo(map)
+                .bindPopup(`<b>${stop.name}</b><br>Price: $${stop.retail_price}<br>${stop.city}, ${stop.state}`);
+        });
+    </script>
+</body>
+</html>

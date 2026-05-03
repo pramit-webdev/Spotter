@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: spotter-fuel-api
+    env: python
+    plan: free
+    buildCommand: "./venv/bin/pip install -r requirements.txt && ./venv/bin/python3 manage.py collectstatic --noinput && ./venv/bin/python3 manage.py migrate"
+    startCommand: "gunicorn spotter_api.wsgi:application"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.0
+      - key: DEBUG
+        value: "False"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: spotter-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ORS_API_KEY
+        sync: false # Set this in the Render dashboard
+      - key: ALLOWED_HOSTS
+        value: ".onrender.com"
