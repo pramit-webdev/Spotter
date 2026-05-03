@@ -12,7 +12,7 @@ class FuelRouteView(APIView):
     def get(self, request):
         start_loc = request.query_params.get('start')
         end_loc = request.query_params.get('end')
-        format_type = request.query_params.get('format', 'json')
+        ui_type = request.query_params.get('ui', 'json')
         
         if not start_loc or not end_loc:
             return Response({"error": "Start and end locations are required"}, status=status.HTTP_400_BAD_REQUEST)
@@ -54,7 +54,7 @@ class FuelRouteView(APIView):
                 }
             }
 
-            if format_type == 'map':
+            if ui_type == 'map':
                 return render(request, 'fuel_route/map.html', {
                     **data,
                     'route_json': json.dumps(route),
