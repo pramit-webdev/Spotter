@@ -7,166 +7,226 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #2563eb;
-            --primary-hover: #1d4ed8;
-            --bg: #0f172a;
-            --card-bg: rgba(30, 41, 59, 0.7);
+            --primary: #3b82f6;
+            --accent: #10b981;
+            --bg: #020617;
+            --glass: rgba(15, 23, 42, 0.7);
         }
 
-        body {
+        body, html {
             margin: 0; padding: 0;
             font-family: 'Outfit', sans-serif;
-            background: radial-gradient(circle at top right, #1e293b, #0f172a);
+            background: var(--bg);
             color: white;
             height: 100vh;
+            overflow: hidden;
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
-        .container {
-            width: 100%;
-            max-width: 500px;
-            padding: 40px;
-            text-align: center;
-            animation: fadeIn 0.8s ease-out;
+        /* Animated Background Particles */
+        #bg-canvas {
+            position: fixed;
+            top: 0; left: 0;
+            z-index: -1;
+            width: 100%; height: 100%;
+            background: radial-gradient(circle at center, #1e293b 0%, #020617 100%);
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
+        .container {
+            width: 100%;
+            max-width: 480px;
+            padding: 20px;
+            text-align: center;
+            z-index: 10;
+        }
+
+        .logo-container {
+            margin-bottom: 40px;
+            animation: fadeInDown 1s ease-out;
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
         .logo {
-            font-size: 3rem;
-            font-weight: 700;
-            background: linear-gradient(to right, #60a5fa, #2563eb);
+            font-size: 3.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #60a5fa, #3b82f6);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            margin-bottom: 10px;
+            letter-spacing: -2px;
+            margin: 0;
         }
 
-        .subtitle {
+        .tagline {
             color: #94a3b8;
-            font-size: 1.1rem;
-            margin-bottom: 40px;
+            font-size: 1rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            font-weight: 500;
+            margin-top: -5px;
         }
 
         .search-card {
-            background: var(--card-bg);
-            backdrop-filter: blur(12px);
+            background: var(--glass);
+            backdrop-filter: blur(24px);
             border: 1px solid rgba(255,255,255,0.1);
-            padding: 30px;
-            border-radius: 24px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            padding: 40px;
+            border-radius: 32px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+            animation: scaleUp 0.8s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        .input-group {
+        @keyframes scaleUp {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .input-wrapper {
             text-align: left;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
+            position: relative;
         }
 
         label {
             display: block;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 1.5px;
             color: #64748b;
-            margin-bottom: 8px;
-            margin-left: 4px;
+            margin-bottom: 10px;
+            font-weight: 600;
         }
 
         input {
             width: 100%;
-            background: rgba(15, 23, 42, 0.6);
+            background: rgba(0, 0, 0, 0.3);
             border: 1px solid rgba(255,255,255,0.1);
-            padding: 14px 18px;
-            border-radius: 12px;
+            padding: 16px 20px;
+            border-radius: 16px;
             color: white;
-            font-size: 1rem;
+            font-size: 1.05rem;
             font-family: inherit;
             box-sizing: border-box;
-            transition: all 0.3s;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         input:focus {
             outline: none;
             border-color: var(--primary);
-            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.2);
+            background: rgba(0, 0, 0, 0.5);
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
         }
 
         .btn {
             width: 100%;
-            background: var(--primary);
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
             color: white;
             border: none;
-            padding: 16px;
-            border-radius: 12px;
+            padding: 18px;
+            border-radius: 16px;
             font-size: 1.1rem;
-            font-weight: 600;
+            font-weight: 700;
             cursor: pointer;
             transition: all 0.3s;
-            margin-top: 10px;
+            margin-top: 15px;
+            box-shadow: 0 10px 20px rgba(37, 99, 235, 0.2);
         }
 
         .btn:hover {
-            background: var(--primary-hover);
             transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3);
+            box-shadow: 0 15px 30px rgba(37, 99, 235, 0.4);
+            filter: brightness(1.1);
+        }
+
+        .loading-overlay {
+            display: none;
+            margin-top: 20px;
+            color: var(--primary);
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        .pulse {
+            width: 12px; height: 12px;
+            background: var(--primary);
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.8); opacity: 0.5; }
+            50% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(0.8); opacity: 0.5; }
         }
 
         .examples {
-            margin-top: 30px;
+            margin-top: 35px;
             display: flex;
             justify-content: center;
-            gap: 10px;
+            gap: 12px;
             flex-wrap: wrap;
         }
 
-        .example-chip {
-            background: rgba(255,255,255,0.05);
-            padding: 6px 14px;
-            border-radius: 20px;
+        .chip {
+            background: rgba(255,255,255,0.03);
+            padding: 8px 16px;
+            border-radius: 100px;
             font-size: 0.85rem;
-            color: #94a3b8;
+            color: #64748b;
             cursor: pointer;
             transition: all 0.3s;
-            border: 1px solid transparent;
+            border: 1px solid rgba(255,255,255,0.05);
         }
 
-        .example-chip:hover {
-            background: rgba(255,255,255,0.1);
-            color: white;
+        .chip:hover {
+            background: rgba(255,255,255,0.08);
+            color: #fff;
             border-color: rgba(255,255,255,0.2);
+            transform: scale(1.05);
         }
     </style>
 </head>
 <body>
+    <canvas id="bg-canvas"></canvas>
+
     <div class="container">
-        <div class="logo">Spotter</div>
-        <div class="subtitle">AI-Powered Fuel Route Optimizer</div>
+        <div class="logo-container">
+            <h1 class="logo">Spotter</h1>
+            <div class="tagline">Smart Logistics</div>
+        </div>
 
         <div class="search-card">
-            <form action="/api/route/" method="get">
+            <form action="/api/route/" method="get" onsubmit="showLoading()">
                 <input type="hidden" name="ui" value="map">
                 
-                <div class="input-group">
-                    <label>Start Location</label>
-                    <input type="text" name="start" id="startInput" placeholder="e.g. Chicago, IL" required>
+                <div class="input-wrapper">
+                    <label>Starting Point</label>
+                    <input type="text" name="start" id="startInput" placeholder="Enter origin city..." required>
                 </div>
 
-                <div class="input-group">
-                    <label>End Location</label>
-                    <input type="text" name="end" id="endInput" placeholder="e.g. St. Louis, MO" required>
+                <div class="input-wrapper">
+                    <label>Destination</label>
+                    <input type="text" name="end" id="endInput" placeholder="Enter target city..." required>
                 </div>
 
-                <button type="submit" class="btn">Optimize My Route</button>
+                <button type="submit" class="btn">Calculate Optimal Route</button>
             </form>
 
+            <div id="loading" class="loading-overlay">
+                <span class="pulse"></span> AI OPTIMIZING ROUTE...
+            </div>
+
             <div class="examples">
-                <div class="example-chip" onclick="setExample('Phoenix, AZ', 'Tucson, AZ')">Phoenix → Tucson</div>
-                <div class="example-chip" onclick="setExample('Miami, FL', 'Orlando, FL')">Miami → Orlando</div>
-                <div class="example-chip" onclick="setExample('New York, NY', 'Washington, DC')">NYC → DC</div>
+                <div class="chip" onclick="setExample('Phoenix, AZ', 'Tucson, AZ')">Phoenix → Tucson</div>
+                <div class="chip" onclick="setExample('Dallas, TX', 'Houston, TX')">Dallas → Houston</div>
+                <div class="chip" onclick="setExample('Chicago, IL', 'St. Louis, MO')">Chicago → St. Louis</div>
             </div>
         </div>
     </div>
@@ -176,6 +236,46 @@
             document.getElementById('startInput').value = start;
             document.getElementById('endInput').value = end;
         }
+
+        function showLoading() {
+            document.getElementById('loading').style.display = 'block';
+        }
+
+        // Simple starfield background effect
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+        let points = [];
+
+        function init() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            points = [];
+            for(let i=0; i<100; i++) {
+                points.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    s: Math.random() * 2,
+                    v: Math.random() * 0.5
+                });
+            }
+        }
+
+        function draw() {
+            ctx.clearRect(0,0, canvas.width, canvas.height);
+            ctx.fillStyle = 'rgba(255,255,255,0.2)';
+            points.forEach(p => {
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.s, 0, Math.PI*2);
+                ctx.fill();
+                p.y -= p.v;
+                if(p.y < 0) p.y = canvas.height;
+            });
+            requestAnimationFrame(draw);
+        }
+
+        window.addEventListener('resize', init);
+        init();
+        draw();
     </script>
 </body>
 </html>

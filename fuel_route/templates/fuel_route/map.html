@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Spotter | Fuel Route Planner</title>
+    <title>Spotter | Optimize Your Route</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
         :root {
-            --primary: #2563eb;
+            --primary: #3b82f6;
             --accent: #10b981;
-            --bg: #0f172a;
-            --glass: rgba(255, 255, 255, 0.08);
+            --bg: #020617;
+            --glass: rgba(15, 23, 42, 0.8);
             --glass-border: rgba(255, 255, 255, 0.1);
         }
 
@@ -24,124 +24,164 @@
             overflow: hidden;
         }
 
-        #map { height: 100vh; width: 100vw; z-index: 1; }
+        #map { height: 100vh; width: 100vw; z-index: 1; filter: saturate(1.2) contrast(1.1); }
 
         .overlay {
             position: absolute;
             top: 20px;
             left: 20px;
             z-index: 1000;
-            width: 350px;
+            width: 380px;
             pointer-events: none;
         }
 
         .card {
             background: var(--glass);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
+            backdrop-filter: blur(20px);
             border: 1px solid var(--glass-border);
-            padding: 24px;
-            border-radius: 20px;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            padding: 30px;
+            border-radius: 28px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
             pointer-events: auto;
-            animation: slideIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            animation: slideIn 0.8s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         @keyframes slideIn {
-            from { transform: translateX(-100%); opacity: 0; }
+            from { transform: translateX(-40px); opacity: 0; }
             to { transform: translateX(0); opacity: 1; }
         }
 
-        h1 { margin: 0 0 4px 0; font-size: 1.5rem; font-weight: 700; color: #fff; }
-        .route-sub { color: rgba(255,255,255,0.6); font-size: 0.9rem; margin-bottom: 20px; }
+        h1 { margin: 0; font-size: 1.8rem; font-weight: 700; color: #fff; letter-spacing: -0.5px; }
+        .brand { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 2px; color: var(--primary); font-weight: 700; margin-bottom: 8px; }
+        .route-sub { color: rgba(255,255,255,0.5); font-size: 0.95rem; margin-bottom: 25px; display: flex; align-items: center; gap: 8px; }
 
         .stat-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 12px;
+            gap: 15px;
         }
 
         .stat-item {
-            background: rgba(255,255,255,0.05);
-            padding: 12px;
-            border-radius: 12px;
+            background: rgba(255,255,255,0.03);
+            padding: 15px;
+            border-radius: 16px;
             border: 1px solid rgba(255,255,255,0.05);
+            transition: transform 0.3s ease;
         }
+        .stat-item:hover { transform: translateY(-2px); background: rgba(255,255,255,0.05); }
 
-        .stat-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,0.5); }
-        .stat-value { font-size: 1.1rem; font-weight: 600; margin-top: 4px; color: #fff; }
-        .stat-value.price { color: var(--accent); }
+        .stat-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,0.4); font-weight: 600; }
+        .stat-value { font-size: 1.2rem; font-weight: 700; margin-top: 6px; color: #fff; }
+        .stat-value.price { color: var(--accent); text-shadow: 0 0 15px rgba(16, 185, 129, 0.3); }
 
-        .fuel-list { margin-top: 20px; }
+        .fuel-list { margin-top: 30px; }
+        .section-title { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,0.4); margin-bottom: 12px; font-weight: 600; }
+        
         .fuel-item {
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 12px;
-            background: rgba(16, 185, 129, 0.1);
-            border-left: 3px solid var(--accent);
-            border-radius: 8px;
-            margin-bottom: 8px;
-            font-size: 0.9rem;
+            gap: 15px;
+            padding: 16px;
+            background: linear-gradient(90deg, rgba(16, 185, 129, 0.1) 0%, rgba(16, 185, 129, 0.02) 100%);
+            border-left: 4px solid var(--accent);
+            border-radius: 12px;
+            margin-bottom: 10px;
+            animation: fadeInItem 0.5s ease-out both;
         }
 
-        /* Leaflet Overrides */
-        .leaflet-container { background: var(--bg) !important; }
-        .leaflet-bar { border: none !important; box-shadow: 0 4px 12px rgba(0,0,0,0.2) !important; }
-        .leaflet-bar a { background: var(--glass) !important; color: white !important; backdrop-filter: blur(8px); border-bottom: 1px solid var(--glass-border) !important; }
+        @keyframes fadeInItem {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .new-search-btn {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            background: var(--primary);
+            color: white;
+            text-decoration: none;
+            padding: 14px 28px;
+            border-radius: 50px;
+            font-weight: 600;
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4);
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .new-search-btn:hover { background: #2563eb; transform: translateX(-50%) translateY(-3px); box-shadow: 0 15px 30px rgba(59, 130, 246, 0.5); }
+
+        /* Custom Popup Style */
+        .leaflet-popup-content-wrapper { background: var(--glass); backdrop-filter: blur(10px); border: 1px solid var(--glass-border); color: white; border-radius: 15px; }
+        .leaflet-popup-tip { background: var(--glass); }
     </style>
 </head>
 <body>
     <div class="overlay">
         <div class="card">
-            <h1>Fuel Optimizer</h1>
-            <div class="route-sub">{{ start }} → {{ end }}</div>
+            <div class="brand">Spotter AI</div>
+            <h1>Optimized Route</h1>
+            <div class="route-sub">
+                <span>{{ start }}</span>
+                <svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\"><path d=\"M5 12h14M12 5l7 7-7 7\"/></svg>
+                <span>{{ end }}</span>
+            </div>
             
             <div class="stat-grid">
                 <div class="stat-item">
-                    <div class="stat-label">Distance</div>
-                    <div class="stat-value">{{ summary.total_distance_miles|floatformat:1 }} mi</div>
+                    <div class="stat-label">Total Distance</div>
+                    <div class="stat-value">{{ summary.total_distance_miles|floatformat:1 }} <span style=\"font-size: 0.8rem; font-weight: 400; opacity: 0.5;\">mi</span></div>
                 </div>
                 <div class="stat-item">
-                    <div class="stat-label">Total Cost</div>
+                    <div class="stat-label">Estimated Cost</div>
                     <div class="stat-value price">${{ summary.estimated_total_cost|floatformat:2 }}</div>
                 </div>
                 <div class="stat-item">
-                    <div class="stat-label">Fuel Needed</div>
-                    <div class="stat-value">{{ summary.total_fuel_gallons|floatformat:1 }} gal</div>
+                    <div class="stat-label">Fuel Volume</div>
+                    <div class="stat-value">{{ summary.total_fuel_gallons|floatformat:1 }} <span style=\"font-size: 0.8rem; font-weight: 400; opacity: 0.5;\">gal</span></div>
                 </div>
                 <div class="stat-item">
-                    <div class="stat-label">Stops</div>
+                    <div class="stat-label">Fuel Stops</div>
                     <div class="stat-value">{{ fuel_stops|length }}</div>
                 </div>
             </div>
 
             <div class="fuel-list">
-                <div class="stat-label" style="margin-bottom: 10px;">Recommended Stops</div>
+                <div class="section-title">Recommended Refuel Points</div>
                 {% for stop in fuel_stops %}
-                <div class="fuel-item">
-                    <div style="flex: 1;">
-                        <div style="font-weight: 600;">{{ stop.name }}</div>
-                        <div style="font-size: 0.8rem; color: rgba(255,255,255,0.6);">{{ stop.city }}, {{ stop.state }}</div>
+                <div class="fuel-item" style=\"animation-delay: {{ forloop.counter|add:2|multiply:0.1 }}s\">
+                    <div style=\"flex: 1;\">
+                        <div style=\"font-weight: 600; font-size: 1rem;\">{{ stop.name }}</div>
+                        <div style=\"font-size: 0.8rem; color: rgba(255,255,255,0.4); margin-top: 2px;\">{{ stop.city }}, {{ stop.state }}</div>
                     </div>
-                    <div style="font-weight: 700; color: var(--accent);">${{ stop.retail_price }}</div>
+                    <div style=\"text-align: right;\">
+                        <div style=\"font-weight: 700; color: var(--accent); font-size: 1.1rem;\">${{ stop.retail_price }}</div>
+                        <div style=\"font-size: 0.6rem; text-transform: uppercase; color: rgba(255,255,255,0.3);\">Per Gallon</div>
+                    </div>
                 </div>
                 {% empty %}
-                <div style="color: rgba(255,255,255,0.4); font-size: 0.8rem;">No stops required for this distance.</div>
+                <div style=\"color: rgba(255,255,255,0.3); font-size: 0.85rem; padding: 20px; text-align: center; border: 1px dashed rgba(255,255,255,0.1); border-radius: 12px;\">No stops required for this trip.</div>
                 {% endfor %}
             </div>
         </div>
     </div>
 
+    <a href=\"/\" class=\"new-search-btn\">
+        <svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\"><path d=\"M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z\"/></svg>
+        New Search
+    </a>
+
     <div id="map"></div>
 
     <script>
-        // Use CartoDB Dark Matter tiles for a premium look
         var map = L.map('map', { zoomControl: false }).setView([39.8283, -98.5795], 4);
         L.control.zoom({ position: 'bottomright' }).addTo(map);
 
         L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+            attribution: '&copy; Spotter AI | CARTO'
         }).addTo(map);
 
         var routeData = {{ route_json|safe }};
@@ -150,29 +190,40 @@
         if (routeData && routeData.routes && routeData.routes.length > 0) {
             var coords = routeData.routes[0].geometry.coordinates.map(p => [p[1], p[0]]);
             var polyline = L.polyline(coords, {
-                color: '#2563eb',
-                weight: 5,
-                opacity: 0.8,
+                color: '#3b82f6',
+                weight: 6,
+                opacity: 0.9,
+                lineCap: 'round',
                 lineJoin: 'round'
             }).addTo(map);
-            map.fitBounds(polyline.getBounds(), { padding: [50, 50] });
+            
+            // Add a subtle glow to the route line
+            var glow = L.polyline(coords, {
+                color: '#3b82f6',
+                weight: 12,
+                opacity: 0.2,
+                lineCap: 'round'
+            }).addTo(map);
+
+            map.fitBounds(polyline.getBounds(), { padding: [80, 80] });
         }
 
         stops.forEach(function(stop) {
+            // High-end custom marker
             var marker = L.circleMarker([stop.latitude, stop.longitude], {
-                radius: 8,
+                radius: 10,
                 fillColor: '#10b981',
                 color: '#fff',
-                weight: 2,
+                weight: 3,
                 opacity: 1,
                 fillOpacity: 1
             }).addTo(map);
 
             marker.bindPopup(`
-                <div style="color: #1e293b; font-family: 'Outfit', sans-serif;">
-                    <strong style="font-size: 1.1rem;">${stop.name}</strong><br>
-                    <span style="color: #059669; font-weight: 700; font-size: 1.2rem;">$${stop.retail_price}</span><br>
-                    <span style="color: #64748b;">${stop.address}, ${stop.city}</span>
+                <div style=\"color: #fff; min-width: 200px;\">
+                    <div style=\"font-weight: 700; font-size: 1.1rem; margin-bottom: 5px;\">${stop.name}</div>
+                    <div style=\"color: #10b981; font-weight: 800; font-size: 1.4rem;\">$${stop.retail_price}</div>
+                    <div style=\"color: rgba(255,255,255,0.6); font-size: 0.85rem; margin-top: 5px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 5px;\">${stop.address}<br>${stop.city}, ${stop.state}</div>
                 </div>
             `);
         });
