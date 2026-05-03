@@ -1,7 +1,7 @@
 from django.db import models
 
 class FuelStation(models.Model):
-    opis_id = models.IntegerField(unique=True)
+    opis_id = models.IntegerField()
     name = models.CharField(max_length=255)
     address = models.CharField(max_length=255)
     city = models.CharField(max_length=100)
