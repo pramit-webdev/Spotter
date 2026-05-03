@@ -1,39 +1,180 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Fuel Route Planner</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spotter | Fuel Route Planner</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
-        #map { height: 600px; width: 100%; border-radius: 12px; }
-        body { font-family: 'Inter', sans-serif; padding: 20px; background: #f4f7f6; }
-        .stats { background: white; padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        :root {
+            --primary: #2563eb;
+            --accent: #10b981;
+            --bg: #0f172a;
+            --glass: rgba(255, 255, 255, 0.08);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        body, html { 
+            margin: 0; padding: 0; height: 100%; 
+            font-family: 'Outfit', sans-serif; 
+            background: var(--bg);
+            color: white;
+            overflow: hidden;
+        }
+
+        #map { height: 100vh; width: 100vw; z-index: 1; }
+
+        .overlay {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            width: 350px;
+            pointer-events: none;
+        }
+
+        .card {
+            background: var(--glass);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            padding: 24px;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            pointer-events: auto;
+            animation: slideIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(-100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        h1 { margin: 0 0 4px 0; font-size: 1.5rem; font-weight: 700; color: #fff; }
+        .route-sub { color: rgba(255,255,255,0.6); font-size: 0.9rem; margin-bottom: 20px; }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .stat-item {
+            background: rgba(255,255,255,0.05);
+            padding: 12px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .stat-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,0.5); }
+        .stat-value { font-size: 1.1rem; font-weight: 600; margin-top: 4px; color: #fff; }
+        .stat-value.price { color: var(--accent); }
+
+        .fuel-list { margin-top: 20px; }
+        .fuel-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: rgba(16, 185, 129, 0.1);
+            border-left: 3px solid var(--accent);
+            border-radius: 8px;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        /* Leaflet Overrides */
+        .leaflet-container { background: var(--bg) !important; }
+        .leaflet-bar { border: none !important; box-shadow: 0 4px 12px rgba(0,0,0,0.2) !important; }
+        .leaflet-bar a { background: var(--glass) !important; color: white !important; backdrop-filter: blur(8px); border-bottom: 1px solid var(--glass-border) !important; }
     </style>
 </head>
 <body>
-    <div class="stats">
-        <h1>Fuel Route: {{ start }} to {{ end }}</h1>
-        <p><b>Total Distance:</b> {{ summary.total_distance_miles }} miles</p>
-        <p><b>Total Cost:</b> ${{ summary.estimated_total_cost }}</p>
-        <p><b>Fuel Stops:</b> {{ fuel_stops|length }}</p>
+    <div class="overlay">
+        <div class="card">
+            <h1>Fuel Optimizer</h1>
+            <div class="route-sub">{{ start }} → {{ end }}</div>
+            
+            <div class="stat-grid">
+                <div class="stat-item">
+                    <div class="stat-label">Distance</div>
+                    <div class="stat-value">{{ summary.total_distance_miles|floatformat:1 }} mi</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Total Cost</div>
+                    <div class="stat-value price">${{ summary.estimated_total_cost|floatformat:2 }}</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Fuel Needed</div>
+                    <div class="stat-value">{{ summary.total_fuel_gallons|floatformat:1 }} gal</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Stops</div>
+                    <div class="stat-value">{{ fuel_stops|length }}</div>
+                </div>
+            </div>
+
+            <div class="fuel-list">
+                <div class="stat-label" style="margin-bottom: 10px;">Recommended Stops</div>
+                {% for stop in fuel_stops %}
+                <div class="fuel-item">
+                    <div style="flex: 1;">
+                        <div style="font-weight: 600;">{{ stop.name }}</div>
+                        <div style="font-size: 0.8rem; color: rgba(255,255,255,0.6);">{{ stop.city }}, {{ stop.state }}</div>
+                    </div>
+                    <div style="font-weight: 700; color: var(--accent);">${{ stop.retail_price }}</div>
+                </div>
+                {% empty %}
+                <div style="color: rgba(255,255,255,0.4); font-size: 0.8rem;">No stops required for this distance.</div>
+                {% endfor %}
+            </div>
+        </div>
     </div>
+
     <div id="map"></div>
 
     <script>
-        var map = L.map('map');
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+        // Use CartoDB Dark Matter tiles for a premium look
+        var map = L.map('map', { zoomControl: false }).setView([39.8283, -98.5795], 4);
+        L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+        }).addTo(map);
 
         var routeData = {{ route_json|safe }};
-        var coords = routeData.routes[0].geometry.coordinates.map(p => [p[1], p[0]]);
-        
-        var polyline = L.polyline(coords, {color: 'blue'}).addTo(map);
-        map.fitBounds(polyline.getBounds());
-
         var stops = {{ stops_json|safe }};
+
+        if (routeData && routeData.routes && routeData.routes.length > 0) {
+            var coords = routeData.routes[0].geometry.coordinates.map(p => [p[1], p[0]]);
+            var polyline = L.polyline(coords, {
+                color: '#2563eb',
+                weight: 5,
+                opacity: 0.8,
+                lineJoin: 'round'
+            }).addTo(map);
+            map.fitBounds(polyline.getBounds(), { padding: [50, 50] });
+        }
+
         stops.forEach(function(stop) {
-            L.marker([stop.latitude, stop.longitude])
-                .addTo(map)
-                .bindPopup(`<b>${stop.name}</b><br>Price: $${stop.retail_price}<br>${stop.city}, ${stop.state}`);
+            var marker = L.circleMarker([stop.latitude, stop.longitude], {
+                radius: 8,
+                fillColor: '#10b981',
+                color: '#fff',
+                weight: 2,
+                opacity: 1,
+                fillOpacity: 1
+            }).addTo(map);
+
+            marker.bindPopup(`
+                <div style="color: #1e293b; font-family: 'Outfit', sans-serif;">
+                    <strong style="font-size: 1.1rem;">${stop.name}</strong><br>
+                    <span style="color: #059669; font-weight: 700; font-size: 1.2rem;">$${stop.retail_price}</span><br>
+                    <span style="color: #64748b;">${stop.address}, ${stop.city}</span>
+                </div>
+            `);
         });
     </script>
 </body>
